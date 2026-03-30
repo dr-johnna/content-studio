@@ -325,7 +325,7 @@ function pickUniqueTopics(count) {
 }
 
 async function callClaude(prompt, systemOverride) {
-  const r = await fetch('https://api.anthropic.com/v1/messages', {
+  const r = await fetch('/api/claude-proxy', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({

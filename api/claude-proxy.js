@@ -20,7 +20,9 @@ export default async function handler(req, res) {
       body: JSON.stringify(req.body),
       signal: AbortSignal.timeout(60000)
     });
-    const data = await upstream.json();
+    const text = await upstream.text();
+    console.log('claude status:', upstream.status, 'body:', text.slice(0, 500));
+    const data = JSON.parse(text);
     return res.status(upstream.status).json(data);
   } catch (err) {
     return res.status(500).json({ error: err.message });

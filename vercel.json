@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/api/blotato/:path*", "destination": "/api/blotato-proxy" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ]
+}

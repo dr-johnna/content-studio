@@ -330,13 +330,15 @@ async function callClaude(prompt, systemOverride) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: 'claude-sonnet-4-6',
-      max_tokens: 1000,
+      max_tokens: 2000,
       system: systemOverride || BRAND_SYSTEM,
       messages: [{ role: 'user', content: prompt }]
     })
   });
   const d = await r.json();
-  return d.content?.[0]?.text || '';
+  if (d.error) throw new Error(d.error.message || JSON.stringify(d.error));
+  if (!d.content?.[0]?.text) throw new Error('Empty response: ' + JSON.stringify(d));
+  return d.content[0].text;
 }
 
 async function callBlotato(endpoint, method, body) {
@@ -618,8 +620,10 @@ async function generateRepurpose() {
   let result = {};
   try {
     const raw = await callClaude(`Repurpose this ${type} content for Dr. Johnna. Avatar: ${avatar}. Content: "${input.substring(0,3500)}". Find the strongest teachable moment. Write 6-slide carousel (slide 1: 5-8 words hook, slides 2-5: arc, slide 6: payoff) and captions for instagram, facebook, linkedin, tiktok using all brand and platform rules. Return ONLY: {"slides":[...],"captions":{"instagram":"...","facebook":"...","linkedin":"...","tiktok":"..."}} No preamble, no backticks.`);
-    result = JSON.parse(raw.replace(/```json|```/g, '').trim());
-  } catch(e) { btn.disabled = false; btn.textContent = 'Extract angle + generate + schedule'; return setStatus('status-repurpose', 'error', 'Could not process content. Please try again.'); }
+    const cleaned = raw.replace(/```json|```/g, '').trim();
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+    result = JSON.parse(jsonMatch ? jsonMatch[0] : cleaned);
+  } catch(e) { btn.disabled = false; btn.textContent = 'Extract angle + generate + schedule'; return setStatus('status-repurpose', 'error', 'Could not process content: ' + e.message); }
 
   const slides = result.slides || [], captions = result.captions || {};
   const firstTime = getNextSlot(timePref);

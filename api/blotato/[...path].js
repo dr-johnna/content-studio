@@ -6,9 +6,12 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   const apiKey = req.headers['blotato-api-key'];
-  const pathParts = req.query.path;
-  const path = pathParts ? '/' + (Array.isArray(pathParts) ? pathParts.join('/') : pathParts) : '/';
-  const blotatoUrl = 'https://backend.blotato.com' + path;
+  const rawUrl = req.url || '';
+  const qIndex = rawUrl.indexOf('?');
+  const pathname = qIndex >= 0 ? rawUrl.slice(0, qIndex) : rawUrl;
+  const qs = qIndex >= 0 ? rawUrl.slice(qIndex) : '';
+  const upstreamPath = pathname.replace(/^\/api\/blotato/, '') || '/';
+  const blotatoUrl = 'https://backend.blotato.com' + upstreamPath + qs;
 
   try {
     const fetchOptions = {

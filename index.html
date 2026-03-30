@@ -351,7 +351,7 @@ async function callBlotato(endpoint, method, body) {
 async function loadAccounts() {
   try {
     const d = await callBlotato('/v2/users/me/accounts', 'GET');
-    const list = d.accounts || d || [];
+    const list = d.items || d.accounts || (Array.isArray(d) ? d : []);
     if (Array.isArray(list)) list.forEach(a => { accounts[(a.platform||'').toLowerCase()] = a.id || a.accountId; });
     const found = Object.keys(accounts);
     const el = document.getElementById('acct-summary');

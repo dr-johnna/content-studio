@@ -22,9 +22,7 @@ export default async function handler(req, res) {
       fetchOptions.body = JSON.stringify(req.body);
     }
     const upstream = await fetch(blotatoUrl, fetchOptions);
-    const text = await upstream.text();
-    console.log('blotato', upstream.status, blotatoUrl, text.slice(0, 300));
-    const data = JSON.parse(text);
+    const data = await upstream.json();
     return res.status(upstream.status).json(data);
   } catch (err) {
     return res.status(500).json({ error: err.message, url: blotatoUrl, key: apiKey ? 'present' : 'missing' });

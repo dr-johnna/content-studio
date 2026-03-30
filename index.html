@@ -350,7 +350,7 @@ async function callBlotato(endpoint, method, body) {
 
 async function loadAccounts() {
   try {
-    const d = await callBlotato('/v1/accounts', 'GET');
+    const d = await callBlotato('/v2/users/me/accounts', 'GET');
     const list = d.accounts || d || [];
     if (Array.isArray(list)) list.forEach(a => { accounts[(a.platform||'').toLowerCase()] = a.id || a.accountId; });
     const found = Object.keys(accounts);
@@ -421,14 +421,14 @@ function switchTab(t) {
 
 async function createTweetCardVisual(quotes) {
   try {
-    const res = await callBlotato('/v1/visuals', 'POST', {
+    const res = await callBlotato('/v2/visuals', 'POST', {
       templateId: 'tweet-card-carousel-minimal', render: true,
       inputs: { quotes, authorName: AUTHOR_NAME, handle: HANDLE, profileImage: PROFILE_IMAGE, verified: true, theme: 'dark' }
     });
     if (!res.id) return null;
     for (let i = 0; i < 18; i++) {
       await new Promise(r => setTimeout(r, 5000));
-      const s = await callBlotato('/v1/visuals/' + res.id, 'GET');
+      const s = await callBlotato('/v2/visuals/' + res.id, 'GET');
       if (s.status === 'done' && s.imageUrls?.length) return s.imageUrls;
       if (s.status === 'failed') return null;
     }
@@ -442,7 +442,7 @@ async function schedulePost(platform, text, mediaUrls, scheduledTime) {
   const body = { accountId: String(acctId), platform, text, scheduledTime };
   if (mediaUrls?.length && platform !== 'threads') body.mediaUrls = mediaUrls;
   if (platform === 'tiktok') Object.assign(body, { privacyLevel: 'PUBLIC_TO_EVERYONE', disabledComments: false, disabledDuet: false, disabledStitch: false, isBrandedContent: false, isYourBrand: false, isAiGenerated: false });
-  return callBlotato('/v1/posts', 'POST', body);
+  return callBlotato('/v2/posts', 'POST', body);
 }
 
 let batchPosts = [];
